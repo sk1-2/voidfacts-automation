@@ -83,10 +83,10 @@ def research_topic():
 # ================================================================
 def generate_script(topic_data: dict) -> dict:
     """Call Gemini 1.5 Flash (free) to write the full video script."""
-    import google.generativeai as genai
+    from google import genai
 
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-2.0-flash-lite")
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    model = None  # not used below
 
     prompt = f"""You are writing a script for a YouTube Shorts dark facts channel called VoidFacts.
 Topic: {topic_data['topic']}
@@ -116,7 +116,10 @@ Return ONLY valid JSON — no markdown, no backticks:
   "conclusion": "powerful concluding sentence here."
 }}"""
 
-    resp = model.generate_content(prompt)
+    resp = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt,
+    )
     raw = resp.text.strip()
     raw = re.sub(r"```json\s*", "", raw)
     raw = re.sub(r"```\s*", "", raw)
