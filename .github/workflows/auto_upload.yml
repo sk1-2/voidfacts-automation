@@ -1,0 +1,59 @@
+# .github/workflows/auto_upload.yml
+# This runs your automation twice daily for FREE using GitHub Actions
+# 6:30 AM IST  = 01:00 UTC
+# 11:30 PM IST = 18:00 UTC
+
+name: VoidFacts Auto Upload
+
+on:
+  schedule:
+    # US Eastern peak hours — every 2 hours (UTC times below)
+    # 12:00 PM EST = 17:00 UTC
+    # 02:00 PM EST = 19:00 UTC
+    # 04:00 PM EST = 21:00 UTC
+    # 06:00 PM EST = 23:00 UTC
+    # 08:00 PM EST = 01:00 UTC
+    # 10:00 PM EST = 03:00 UTC
+    - cron: "0 17 * * *"
+    - cron: "0 19 * * *"
+    - cron: "0 21 * * *"
+    - cron: "0 23 * * *"
+    - cron: "0 1 * * *"
+    - cron: "0 3 * * *"
+  workflow_dispatch:        # Manual trigger button in GitHub UI
+
+jobs:
+  generate_and_upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y ffmpeg fonts-liberation
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run VoidFacts Automation
+        env:
+          GEMINI_API_KEY:       ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_CREDENTIALS:  ${{ secrets.YOUTUBE_CREDENTIALS }}
+        run: python main.py once
+
+      - name: Upload video as artifact (backup)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: voidfacts-video-${{ github.run_number }}
+          path: outputs/
+          retention-days: 7
