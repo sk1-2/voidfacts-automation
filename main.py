@@ -86,7 +86,7 @@ def generate_script(topic_data: dict) -> dict:
     import google.generativeai as genai
 
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash")
 
     prompt = f"""You are writing a script for a YouTube Shorts dark facts channel called VoidFacts.
 Topic: {topic_data['topic']}
